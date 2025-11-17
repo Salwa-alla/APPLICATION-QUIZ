@@ -1,162 +1,193 @@
 import React, { useState } from 'react';
-import questions from '../questions';
+import { useNavigate } from 'react-router-dom';
 import './QUIZ.css';
+import questions from '../questions';
 
-export default function Quiz() {
-  const [index, setIndex] = useState(0);               // رقم السؤال
-  const [score, setScore] = useState(0);               // النتيجة
-  const [selectedOption, setSelectedOption] = useState(null); // الجواب لي اختار
-  const [lock, setLock] = useState(false);             // منع التبديل من بعد الجواب
-  const [showResult, setShowResult] = useState(false); // عرض النتيجة
+function Quiz() {
+  const navigate = useNavigate();
 
-  const handleAnswer = (option) => {
-    if (lock) return; // ما يخليكش تبدل الجواب
+  let [index, setIndex] = useState(0);
+  let [question, setQuestion] = useState(questions[index]);
+  let [answered, setAnswered] = useState(false);
+  let [score, setScore] = useState(0);
 
-    setSelectedOption(option);
-    setLock(true);
+  const checkAns = (e, answer) => {
+    if (answered) return; 
+    setAnswered(true);
 
-    if (option === questions[index].answer) {
-      setScore(score + 1);
+    if (question.answer === answer) {
+        e.target.classList.add("correct");
+        setScore(score + 1);
+    } else {
+        e.target.classList.add("wrong");
     }
   };
 
   const nextQuestion = () => {
-    if (!lock) return; // خاصك تجاوب قبل ما تدوز
+    if (index + 1 < questions.length) {
+        setIndex(index + 1);
+        setQuestion(questions[index + 1]);
+        setAnswered(false);
 
-    if (index < questions.length - 1) {
-      setIndex(index + 1);
-      setSelectedOption(null);
-      setLock(false);
+        let allLi = document.querySelectorAll("li");
+        allLi.forEach(li => {
+            li.classList.remove("correct");
+            li.classList.remove("wrong");
+        });
     } else {
-      setShowResult(true);
+        navigate('/result', { state: { score } });
     }
   };
-
-  const prevQuestion = () => {
-    if (index > 0) {
-      setIndex(index - 1);
-      setSelectedOption(null);
-      setLock(false);
-    }
-  };
-
-  const restartQuiz = () => {
-    setIndex(0);
-    setScore(0);
-    setSelectedOption(null);
-    setLock(false);
-    setShowResult(false);
-  };
-
-  if (showResult) {
-    return (
-      <div className="result">
-        <h2>النتيجة النهائية</h2>
-        <p>{score} / {questions.length}</p>
-        <button onClick={restartQuiz}>إعادة المحاولة</button>
-      </div>
-    );
-  }
 
   return (
-    <div className="quiz">
-      <h2>Question {index + 1} / {questions.length}</h2>
-      <h3>{questions[index].question}</h3>
+    <div className='container'>
+      <h1>Quiz App</h1>
+      <hr/>
 
-      <div className="options">
-        {questions[index].options.map((option, i) => (
-          <button
-            key={i}
-            className={
-              selectedOption
-                ? option === questions[index].answer
-                  ? "correct"
-                  : option === selectedOption
-                    ? "wrong"
-                    : ""
-                : ""
-            }
-            onClick={() => handleAnswer(option)}
-          >
-            {option}
-          </button>
-        ))}
+      <h2>{index + 1}. {question.question}</h2>
+
+      <ul>
+        <li onClick={(e)=> checkAns(e,1)}>{question.option1}</li>
+        <li onClick={(e)=> checkAns(e,2)}>{question.option2}</li>
+        <li onClick={(e)=> checkAns(e,3)}>{question.option3}</li>
+        <li onClick={(e)=> checkAns(e,4)}>{question.option4}</li>
+      </ul>
+
+      <button onClick={nextQuestion}>Next</button>
+
+      <div className="index">
+        {index + 1} of {questions.length} questions
       </div>
 
-      <div className="navigation">
-        
-        <button onClick={nextQuestion}>Next</button>
-      </div>
+     
     </div>
   );
 }
 
-// export default function Quiz() {
-//   const [index, setIndex] = useState(0);
+export default Quiz;
+
+
+ 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// function Quiz() {
+//   const navigate = useNavigate();
+//   const [start, setStart] = useState(false);
+//   const [currentQ, setCurrentQ] = useState(0);
 //   const [score, setScore] = useState(0);
-//   const [selectedOption, setSelectedOption] = useState(null);
-//   const [lock, setLock] = useState(false);
-//   const [showResult, setShowResult] = useState(false);
+//   const [selected, setSelected] = useState("");
+//   const [answered, setAnswered] = useState(false);
 
-//   const question = questions[index];
+//   const handleAnswer = (option) => {
+//     setSelected(option);
+//     setAnswered(true);
 
-//   const checkAns = (e, ans) => {
-//     if (!lock) {
-//       setSelectedOption(ans);
-//       setLock(true);
-//       if (question.answer === question.options[ans - 1]) {
-//         e.target.classList.add("correct");
-//         setScore(prev => prev + 1);
-//       } else {
-//         e.target.classList.add("wrong");
-//       }
+//     // مقارنة النصوص بلا فرق في المسافات والحروف الكبيرة/صغيرة
+//     if(option.trim().toLowerCase() === questions[currentQ].answer.trim().toLowerCase()){
+//       setScore(score + 1);
 //     }
-//   };
-
-//   const next = () => {
-//     if (lock) {
-//       if (index === questions.length - 1) {
-//         setShowResult(true);
-//       } else {
-//         setIndex(prev => prev + 1);
-//         setSelectedOption(null);
-//         setLock(false);
-//       }
-//     }
-//   };
-
-//   const restartQuiz = () => {
-//     setIndex(0);
-//     setScore(0);
-//     setSelectedOption(null);
-//     setLock(false);
-//     setShowResult(false);
-//   };
-
-//   if (showResult) {
-//     return (
-//       <div className='result-container'>
-//         <h1>Quiz Terminé!</h1>
-//         <h2>Votre Score: {score} sur {questions.length}</h2>
-//         <button onClick={restartQuiz}>Redémarrer le Quiz</button>
-//       </div>
-//     );
 //   }
 
-//   return (
-//     <div className='container'>
-//       <h1>Quiz App</h1>
-//       <hr />
-//       <h2>{index + 1}. {question.question}</h2>
-//       <ul>
-//         <li onClick={(e) => { checkAns(e, 1) }}>{question.options[0]}</li>
-//         <li onClick={(e) => { checkAns(e, 2) }}>{question.options[1]}</li>
-//         <li onClick={(e) => { checkAns(e, 3) }}>{question.options[2]}</li>
-//         <li onClick={(e) => { checkAns(e, 4) }}>{question.options[3]}</li>
-//       </ul>
-//       <button onClick={next} disabled={!lock}>Next</button>
-//       <div className="index">{index + 1} of {questions.length} questions</div>
+//   const handleNext = () => {
+//     const nextQ = currentQ + 1;
+//     if(nextQ < questions.length){
+//       setCurrentQ(nextQ);
+//       setSelected("");
+//       setAnswered(false);
+//     } else {
+//       navigate('/Result', { state: { score } });
+//     }
+//   }
+
+//   if(!start){
+//     return(
+//       <div className="container">
+//         <div className="navbar"><h1>My Quiz App</h1></div>
+//         <div className="main-content">
+//           <h1>Welcome to the Quiz</h1>
+//           <button className="start-btn" onClick={()=>setStart(true)}>Start Quiz</button>
+//         </div>
+//         <div className="footer"><p>© 2025 My Quiz App. All rights reserved.</p></div>
+//       </div>
+//     )
+//   }
+
+//   return(
+//     <div className="container">
+//       <div className="navbar"><h1>My Quiz App</h1></div>
+
+//       <div className="main-content">
+//         <h2>Q: {questions[currentQ].question}</h2>
+
+//         {questions[currentQ].options.map((option, i) => (
+//           <button
+//             key={i}
+//             onClick={() => handleAnswer(option)}
+//             className={
+//               !answered ? "" :
+          
+//               option === selected ? "wrong" : ""
+//             }
+//             disabled={answered}
+//           >
+//             {option}
+//           </button>
+//         ))}
+
+//         <button
+//           className="next-btn"
+//           onClick={handleNext}
+//           disabled={!answered}
+//         >
+//           Suivant
+//         </button>
+//       </div>
+
+//       <div className="footer"><p>© 2025 My Quiz App. All rights reserved.</p></div>
 //     </div>
-//   );
+//   )
 // }
- 
+
+// export default Quiz;
+
+
+
